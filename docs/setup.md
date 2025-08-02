@@ -31,5 +31,7 @@
    npm run dev
    ```
 
+6. **Not:** Komutlar `cross-env` kullanılarak tanımlandığı için hem Windows hem de Linux'ta aynı şekilde çalışır.
+
 Uygulama varsayılan olarak `http://localhost:5000` adresinde çalışacaktır.
 

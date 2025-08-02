@@ -70,6 +70,7 @@ export function useAuth() {
         title: "Giriş Başarılı",
         description: "Hoş geldiniz!",
       });
+      window.location.href = '/dashboard';
     },
     onError: (error: Error) => {
       toast({

@@ -11,7 +11,9 @@
    npm install
    ```
 
+=======
 3. **Ortam değişkenlerini ayarlayın:** `.env` dosyası oluşturup aşağıdaki bilgileri girin.
+
    ```env
    DATABASE_URL=postgresql://neondb_owner:npg_UyCdK29IOeRZ@ep-small-thunder-a23na84r-pooler.eu-central-1.aws.neon.tech/akkamp?sslmode=require&channel_binding=require
    PGDATABASE=akkamp

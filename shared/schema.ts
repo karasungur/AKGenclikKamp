@@ -92,6 +92,43 @@ export const activityLogs = pgTable("activity_logs", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Program events
+export const events = pgTable("events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  startsAt: timestamp("starts_at").notNull(),
+  title: text("title").notNull(),
+});
+
+// Social media accounts
+export const socialMedia = pgTable("social_media", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  platform: varchar("platform").notNull(),
+  username: varchar("username").notNull(),
+  url: varchar("url").notNull(),
+});
+
+// Team members
+export const teamMembers = pgTable("team_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  role: varchar("role").notNull(),
+  phone: varchar("phone").notNull(),
+});
+
+// Application menu/settings
+export const appSettings = pgTable("app_settings", {
+  id: integer("id").primaryKey().default(1),
+  showProgram: boolean("show_program").notNull().default(true),
+  showPhotos: boolean("show_photos").notNull().default(true),
+  showSocial: boolean("show_social").notNull().default(true),
+  showTeam: boolean("show_team").notNull().default(true),
+  programTitle: varchar("program_title").notNull().default("Program Akışı"),
+  photosTitle: varchar("photos_title").notNull().default("Fotoğraflar"),
+  socialTitle: varchar("social_title").notNull().default("Sosyal Medya"),
+  teamTitle: varchar("team_title").notNull().default("Ekibimiz"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   questions: many(questions),
@@ -176,6 +213,22 @@ export const insertActivityLogSchema = createInsertSchema(activityLogs).omit({
   createdAt: true,
 });
 
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+});
+
+export const insertSocialMediaSchema = createInsertSchema(socialMedia).omit({
+  id: true,
+});
+
+export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
+  id: true,
+});
+
+export const insertAppSettingsSchema = createInsertSchema(appSettings).omit({
+  id: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -189,6 +242,14 @@ export type Feedback = typeof feedback.$inferSelect;
 export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type SocialMedia = typeof socialMedia.$inferSelect;
+export type InsertSocialMedia = z.infer<typeof insertSocialMediaSchema>;
+export type TeamMember = typeof teamMembers.$inferSelect;
+export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
+export type AppSettings = typeof appSettings.$inferSelect;
+export type InsertAppSettings = z.infer<typeof insertAppSettingsSchema>;
 
 // Additional types for API responses
 export type UserWithStats = User & {

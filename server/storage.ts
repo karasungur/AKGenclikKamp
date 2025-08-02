@@ -5,6 +5,10 @@ import {
   answers,
   feedback,
   activityLogs,
+  events,
+  socialMedia,
+  teamMembers,
+  appSettings,
   type User,
   type InsertUser,
   type Table,
@@ -22,6 +26,14 @@ import {
   type AnswerWithDetails,
   type FeedbackWithDetails,
   type ActivityLogWithUser,
+  type Event,
+  type InsertEvent,
+  type SocialMedia,
+  type InsertSocialMedia,
+  type TeamMember,
+  type InsertTeamMember,
+  type AppSettings,
+  type InsertAppSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, sql, count, inArray } from "drizzle-orm";
@@ -77,7 +89,17 @@ export interface IStorage {
   logActivity(log: InsertActivityLog): Promise<ActivityLog>;
   getActivityLogs(limit?: number): Promise<ActivityLog[]>;
   getActivityLogsForUser(userId: string, limit?: number): Promise<ActivityLog[]>;
-  
+
+  // Public content operations
+  getEvents(): Promise<Event[]>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  getSocialMedia(): Promise<SocialMedia[]>;
+  createSocialMedia(account: InsertSocialMedia): Promise<SocialMedia>;
+  getTeamMembers(): Promise<TeamMember[]>;
+  createTeamMember(member: InsertTeamMember): Promise<TeamMember>;
+  getAppSettings(): Promise<AppSettings>;
+  updateAppSettings(settings: Partial<InsertAppSettings>): Promise<AppSettings>;
+
   // Dashboard stats
   getDashboardStats(): Promise<{
     totalTables: number;
@@ -608,6 +630,55 @@ export class DatabaseStorage implements IStorage {
       .where(eq(activityLogs.userId, userId))
       .orderBy(desc(activityLogs.createdAt))
       .limit(limit);
+  }
+
+  // Public content operations
+  async getEvents(): Promise<Event[]> {
+    return db.select().from(events).orderBy(events.startsAt);
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const [e] = await db.insert(events).values(event).returning();
+    return e;
+  }
+
+  async getSocialMedia(): Promise<SocialMedia[]> {
+    return db.select().from(socialMedia).orderBy(socialMedia.platform);
+  }
+
+  async createSocialMedia(account: InsertSocialMedia): Promise<SocialMedia> {
+    const [a] = await db.insert(socialMedia).values(account).returning();
+    return a;
+  }
+
+  async getTeamMembers(): Promise<TeamMember[]> {
+    return db
+      .select()
+      .from(teamMembers)
+      .orderBy(asc(teamMembers.firstName), asc(teamMembers.lastName));
+  }
+
+  async createTeamMember(member: InsertTeamMember): Promise<TeamMember> {
+    const [m] = await db.insert(teamMembers).values(member).returning();
+    return m;
+  }
+
+  async getAppSettings(): Promise<AppSettings> {
+    const [settings] = await db.select().from(appSettings).limit(1);
+    if (!settings) {
+      const [created] = await db.insert(appSettings).values({}).returning();
+      return created;
+    }
+    return settings;
+  }
+
+  async updateAppSettings(settings: Partial<InsertAppSettings>): Promise<AppSettings> {
+    const [updated] = await db
+      .update(appSettings)
+      .set(settings)
+      .where(eq(appSettings.id, 1))
+      .returning();
+    return updated;
   }
 
   // Dashboard stats

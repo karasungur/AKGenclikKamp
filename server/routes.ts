@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { requireAuth, requireRole, generateToken, comparePassword, hashPassword, type AuthenticatedRequest } from "./auth";
-import { insertUserSchema, insertQuestionSchema, insertAnswerSchema, insertFeedbackSchema } from "@shared/schema";
+import { insertUserSchema, insertQuestionSchema, insertAnswerSchema, insertFeedbackSchema, insertEventSchema, insertSocialMediaSchema, insertTeamMemberSchema, insertAppSettingsSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
@@ -912,6 +912,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: 'Export başarısız' });
+    }
+  });
+
+  // Public content routes
+  app.get('/api/public/events', async (_req, res) => {
+    const events = await storage.getEvents();
+    res.json(events);
+  });
+
+  app.get('/api/public/social-media', async (_req, res) => {
+    const accounts = await storage.getSocialMedia();
+    res.json(accounts);
+  });
+
+  app.get('/api/public/team', async (_req, res) => {
+    const team = await storage.getTeamMembers();
+    res.json(team);
+  });
+
+  app.get('/api/public/settings', async (_req, res) => {
+    const settings = await storage.getAppSettings();
+    res.json(settings);
+  });
+
+  // Management routes for genel sekreterlik
+  app.post('/api/events', requireAuth, requireRole(['genelsekreterlik']), async (req, res) => {
+    try {
+      const data = insertEventSchema.parse(req.body);
+      const created = await storage.createEvent(data);
+      res.json(created);
+    } catch (error) {
+      res.status(400).json({ message: 'Etkinlik eklenemedi' });
+    }
+  });
+
+  app.post('/api/social-media', requireAuth, requireRole(['genelsekreterlik']), async (req, res) => {
+    try {
+      const data = insertSocialMediaSchema.parse(req.body);
+      const created = await storage.createSocialMedia(data);
+      res.json(created);
+    } catch (error) {
+      res.status(400).json({ message: 'Sosyal medya hesabı eklenemedi' });
+    }
+  });
+
+  app.post('/api/team', requireAuth, requireRole(['genelsekreterlik']), async (req, res) => {
+    try {
+      const data = insertTeamMemberSchema.parse(req.body);
+      const created = await storage.createTeamMember(data);
+      res.json(created);
+    } catch (error) {
+      res.status(400).json({ message: 'Ekip üyesi eklenemedi' });
+    }
+  });
+
+  app.patch('/api/settings', requireAuth, requireRole(['genelsekreterlik']), async (req, res) => {
+    try {
+      const data = insertAppSettingsSchema.partial().parse(req.body);
+      const updated = await storage.updateAppSettings(data);
+      res.json(updated);
+    } catch (error) {
+      res.status(400).json({ message: 'Ayarlar güncellenemedi' });
     }
   });
 

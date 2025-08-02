@@ -16,6 +16,11 @@ import ModeratorQuestionsPage from "@/pages/moderator-questions";
 import ResponsesPage from "@/pages/responses";
 import TablesPage from "@/pages/tables";
 import NotFound from "@/pages/not-found";
+import HomePage from "@/pages/home";
+import ProgramPage from "@/pages/program";
+import PhotosPage from "@/pages/photos";
+import SocialMediaPage from "@/pages/social-media";
+import TeamPage from "@/pages/team";
 
 function Router() {
   const { user, isLoading, showSplash } = useAuth();
@@ -32,20 +37,26 @@ function Router() {
     );
   }
 
-  if (!user) {
-    return <LoginPage />;
-  }
-
   return (
     <Switch>
-      <Route path="/" component={DashboardPage} />
-      <Route path="/questions" component={user.role === 'moderator' ? ModeratorQuestionsPage : QuestionsPage} />
-      <Route path="/users" component={UsersPage} />
-      <Route path="/reports" component={ReportsPage} />
-      <Route path="/feedback" component={FeedbackPage} />
-      <Route path="/logs" component={LogsPage} />
-      <Route path="/responses" component={ResponsesPage} />
-      <Route path="/tables" component={TablesPage} />
+      <Route path="/" component={HomePage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/program" component={ProgramPage} />
+      <Route path="/photos" component={PhotosPage} />
+      <Route path="/social-media" component={SocialMediaPage} />
+      <Route path="/team" component={TeamPage} />
+      {user && (
+        <>
+          <Route path="/dashboard" component={DashboardPage} />
+          <Route path="/questions" component={user.role === 'moderator' ? ModeratorQuestionsPage : QuestionsPage} />
+          <Route path="/users" component={UsersPage} />
+          <Route path="/reports" component={ReportsPage} />
+          <Route path="/feedback" component={FeedbackPage} />
+          <Route path="/logs" component={LogsPage} />
+          <Route path="/responses" component={ResponsesPage} />
+          <Route path="/tables" component={TablesPage} />
+        </>
+      )}
       <Route component={NotFound} />
     </Switch>
   );
